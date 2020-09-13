@@ -18,7 +18,7 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Header {
 		headers[k] = strings.Join(v, ", ")
 	}
-	headers["Remote-addr"] = r.RemoteAddr
+	headers["Remote-Addr"] = strings.Split(r.RemoteAddr, ":")[0]
 	headersDump, err := json.Marshal(headers)
 	if err != nil {
 		fmt.Println(err.Error())
