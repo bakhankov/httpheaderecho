@@ -2,15 +2,21 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"log/syslog"
 	"net/http"
 	"strings"
 )
 
+var logger *syslog.Writer
+var err error
+
 func main() {
+	logger, err = syslog.New(syslog.LOG_WARNING, "httpheaderecho")
+	if err != nil {
+		panic("Cannot attach to syslog")
+	}
 	http.HandleFunc("/", echoHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	logger.Crit(http.ListenAndServe(":8080", nil).Error())
 }
 
 func echoHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +27,7 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 	headers["Remote-Addr"] = strings.Split(r.RemoteAddr, ":")[0]
 	headersDump, err := json.Marshal(headers)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Err(err.Error())
 	}
 	w.Write(headersDump)
 }
